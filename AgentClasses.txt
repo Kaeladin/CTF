@@ -1,0 +1,5 @@
+4
+ctf.agent.reb140130Agent
+ctf.agent.SimpleAgent
+ctf.agent.RandomAgent
+ctf.agent.BomberAgent
