@@ -66,6 +66,7 @@ public class reb140130Agent extends Agent {
 
 			}
 		}
+		
 
 		if(teleProb>=5){
 			position[0]=0;
@@ -148,19 +149,19 @@ public class reb140130Agent extends Agent {
 
 
 		//System.out.println("pos"+position[0]+","+position[1]+"\n"+"Hist: ");
-		double penScal= -30 / (pathHist.size()+1);
+		double penScal= -50 / (pathHist.size()+1);
 		boolean wasNorth=false, wasSouth=false, wasEast=false, wasWest=false;
 		for(int i=pathHist.size()-1; i>=0; i--){
 			int[] histp=pathHist.get(i);
 			//System.out.println(histp[0]+","+histp[1]);
 			if(histp[0]==position[0]){
-				if(histp[1]==position[1]+1 && !wasNorth){
+				if(histp[1]==position[1]+1){
 					weights[1]+=penScal*i;
 					wasNorth=true;
 
 				}
 
-				if(histp[1]==position[1]-1 && !wasSouth){
+				if(histp[1]==position[1]-1){
 					weights[2]+=penScal*i;
 					wasSouth=true;
 
@@ -170,14 +171,14 @@ public class reb140130Agent extends Agent {
 					weights[0]+=penScal*i;
 				}
 			}
-			if(histp[1]==position[1] && !wasEast){
+			if(histp[1]==position[1]){
 				if(histp[0]==position[0]+1){
 					weights[3]+=penScal*i;
 					wasEast=true;
 
 				}
 
-				if(histp[0]==position[0]-1 && !wasWest){
+				if(histp[0]==position[0]-1 ){
 					weights[4]+=penScal*i;
 					wasWest=true;
 				}
@@ -186,71 +187,99 @@ public class reb140130Agent extends Agent {
 	}
 
 	public void stateHeuristic(AgentEnvironment inEnvironment){
+		
+		double caution = -3;
+		double fear = -10;
+		double politeness = -1000;
+		double terror= -10000;
+		
+		
+		double interest = 1;
+		double desire = 50;
+		double greed = 10000;
 		switch(state){
 		case 1:
-			if(inEnvironment.isFlagNorth(1,false)) weights[1] += 10;
-			if(inEnvironment.isFlagSouth(1,false)) weights[2] += 10;
-			if(inEnvironment.isFlagEast(1,false)) weights[3] += 10;
-			if(inEnvironment.isFlagWest(1,false)) weights[4] += 10;
 
-			if(inEnvironment.isFlagNorth(1,true)) weights[1] += 1000;
-			if(inEnvironment.isFlagSouth(1,true)) weights[2] += 1000;
-			if(inEnvironment.isFlagEast(1,true)) weights[3] += 1000;
-			if(inEnvironment.isFlagWest(1,true)) weights[4] += 1000;
+			if(inEnvironment.isAgentNorth(0,false)) weights[1] += interest;
+			if(inEnvironment.isAgentSouth(0,false)) weights[2] += interest;
+			if(inEnvironment.isAgentEast(0,false)) weights[3] += interest;
+			if(inEnvironment.isAgentWest(0,false)) weights[4] += interest;
+			
+			if(inEnvironment.isFlagNorth(1,false)) weights[1] += desire;
+			if(inEnvironment.isFlagSouth(1,false)) weights[2] += desire;
+			if(inEnvironment.isFlagEast(1,false)) weights[3] += desire;
+			if(inEnvironment.isFlagWest(1,false)) weights[4] += desire;
 
+			if(inEnvironment.isFlagNorth(1,true)) weights[1] += greed;
+			if(inEnvironment.isFlagSouth(1,true)) weights[2] += greed;
+			if(inEnvironment.isFlagEast(1,true)) weights[3] += greed;
+			if(inEnvironment.isFlagWest(1,true)) weights[4] += greed;
 
-			if(inEnvironment.isAgentNorth(1,false)) weights[1] += -1;
-			if(inEnvironment.isAgentSouth(1,false)) weights[2] += -1;
-			if(inEnvironment.isAgentEast(1,false)) weights[3] += -1;
-			if(inEnvironment.isAgentWest(1,false)) weights[4] += -1;
+			
+
+			if(inEnvironment.isAgentNorth(1,false)) weights[1] += caution;
+			if(inEnvironment.isAgentSouth(1,false)) weights[2] += caution;
+			if(inEnvironment.isAgentEast(1,false)) weights[3] += caution;
+			if(inEnvironment.isAgentWest(1,false)) weights[4] += caution;
 
 			//scale this to be dependent on how close you are to base
-			if(inEnvironment.isAgentNorth(1,true)) weights[1] += -1000;
-			if(inEnvironment.isAgentSouth(1,true)) weights[2] += -1000;
-			if(inEnvironment.isAgentEast(1,true)) weights[3] += -1000;
-			if(inEnvironment.isAgentWest(1,true)) weights[4] += -1000;
+			if(inEnvironment.isAgentNorth(1,true)) weights[1] += terror;
+			if(inEnvironment.isAgentSouth(1,true)) weights[2] += terror;
+			if(inEnvironment.isAgentEast(1,true)) weights[3] +=  terror;
+			if(inEnvironment.isAgentWest(1,true)) weights[4] += terror;
 			
-			if(inEnvironment.isAgentNorth(0,true)) weights[1] += -10;
-			if(inEnvironment.isAgentSouth(0,true)) weights[2] += -10;
-			if(inEnvironment.isAgentEast(0,true)) weights[3] += -10;
-			if(inEnvironment.isAgentWest(0,true)) weights[4] += -10;
+			if(inEnvironment.isAgentNorth(0,true)) weights[1] += fear;
+			if(inEnvironment.isAgentSouth(0,true)) weights[2] += fear;
+			if(inEnvironment.isAgentEast(0,true)) weights[3] += fear;
+			if(inEnvironment.isAgentWest(0,true)) weights[4] += fear;
+			
+
+			if(inEnvironment.isBaseNorth(0,true)) weights[1] += terror;
+			if(inEnvironment.isBaseSouth(0,true)) weights[2] += terror;
+			if(inEnvironment.isBaseEast(0,true)) weights[3] += terror;
+			if(inEnvironment.isBaseWest(0,true)) weights[4] += terror;
 			break;
 
 		case 2:
-
-			if(inEnvironment.isFlagNorth(0,false)) weights[1] += 5;
-			if(inEnvironment.isFlagSouth(0,false)) weights[2] += 5;
-			if(inEnvironment.isFlagEast(0,false)) weights[3] += 5;
-			if(inEnvironment.isFlagWest(0,false)) weights[4] += 5;
-
-			if(inEnvironment.isFlagNorth(0,true)) weights[1] += 1000;
-			if(inEnvironment.isFlagSouth(0,true)) weights[2] += 1000;
-			if(inEnvironment.isFlagEast(0,true)) weights[3] += 1000;
-			if(inEnvironment.isFlagWest(0,true)) weights[4] += 1000;
-
-			if(inEnvironment.isAgentNorth(1,false)) weights[1] += 3;
-			if(inEnvironment.isAgentSouth(1,false)) weights[2] += 3;
-			if(inEnvironment.isAgentEast(1,false)) weights[3] += 3;
-			if(inEnvironment.isAgentWest(1,false)) weights[4] += 3;
-
-			if(inEnvironment.isAgentNorth(1,true)) weights[1] += 5;
-			if(inEnvironment.isAgentSouth(1,true)) weights[2] += 5;
-			if(inEnvironment.isAgentEast(1,true)) weights[3] += 5;
-			if(inEnvironment.isAgentWest(1,true)) weights[4] += 5;
 			
-			if(inEnvironment.isAgentNorth(0,true)) weights[1] += -10;
-			if(inEnvironment.isAgentSouth(0,true)) weights[2] += -10;
-			if(inEnvironment.isAgentEast(0,true)) weights[3] += -10;
-			if(inEnvironment.isAgentWest(0,true)) weights[4] += -10;
+			if(inEnvironment.isBaseNorth(1,false)) weights[1] += desire;
+			if(inEnvironment.isBaseSouth(1,false)) weights[2] += desire;
+			if(inEnvironment.isBaseEast(1,false)) weights[3] += desire;
+			if(inEnvironment.isBaseWest(1,false)) weights[4] += desire;
+
+			if(inEnvironment.isFlagNorth(0,false)) weights[1] += desire;
+			if(inEnvironment.isFlagSouth(0,false)) weights[2] += desire;
+			if(inEnvironment.isFlagEast(0,false)) weights[3] += desire;
+			if(inEnvironment.isFlagWest(0,false)) weights[4] += desire;
+
+			if(inEnvironment.isFlagNorth(0,true)) weights[1] += greed;
+			if(inEnvironment.isFlagSouth(0,true)) weights[2] += greed;
+			if(inEnvironment.isFlagEast(0,true)) weights[3] += greed;
+			if(inEnvironment.isFlagWest(0,true)) weights[4] += greed;
+
+			if(inEnvironment.isAgentNorth(1,false)) weights[1] += caution;
+			if(inEnvironment.isAgentSouth(1,false)) weights[2] += caution;
+			if(inEnvironment.isAgentEast(1,false)) weights[3] += caution;
+			if(inEnvironment.isAgentWest(1,false)) weights[4] += caution;
+
+			if(inEnvironment.isAgentNorth(1,true)) weights[1] += caution;
+			if(inEnvironment.isAgentSouth(1,true)) weights[2] += caution;
+			if(inEnvironment.isAgentEast(1,true)) weights[3] += caution;
+			if(inEnvironment.isAgentWest(1,true)) weights[4] += caution;
+			
+			if(inEnvironment.isAgentNorth(0,true)) weights[1] += politeness;
+			if(inEnvironment.isAgentSouth(0,true)) weights[2] += politeness;
+			if(inEnvironment.isAgentEast(0,true)) weights[3] += politeness;
+			if(inEnvironment.isAgentWest(0,true)) weights[4] += politeness;
 			break;
 
 		case 3:
 
 			if(inEnvironment.hasFlag()){
-				if(inEnvironment.isBaseNorth(0,false)) weights[1] += 10;
-				if(inEnvironment.isBaseSouth(0,false)) weights[2] += 10;
-				if(inEnvironment.isBaseEast(0,false)) weights[3] += 10;
-				if(inEnvironment.isBaseWest(0,false)) weights[4] += 10;
+				if(inEnvironment.isBaseNorth(0,false)) weights[1] += desire;
+				if(inEnvironment.isBaseSouth(0,false)) weights[2] += desire;
+				if(inEnvironment.isBaseEast(0,false)) weights[3] += desire;
+				if(inEnvironment.isBaseWest(0,false)) weights[4] += desire;
 
 				if(inEnvironment.isBaseNorth(0,true)) weights[1] += Double.POSITIVE_INFINITY;
 				if(inEnvironment.isBaseSouth(0,true)) weights[2] += Double.POSITIVE_INFINITY;
@@ -258,98 +287,105 @@ public class reb140130Agent extends Agent {
 				if(inEnvironment.isBaseWest(0,true)) weights[4] += Double.POSITIVE_INFINITY;
 
 
-				if(inEnvironment.isAgentNorth(1,false)) weights[1] += -5;
-				if(inEnvironment.isAgentSouth(1,false)) weights[2] += -5;
-				if(inEnvironment.isAgentEast(1,false)) weights[3] += -5;
-				if(inEnvironment.isAgentWest(1,false)) weights[4] += -5;
+				if(inEnvironment.isAgentNorth(1,false)) weights[1] += caution;
+				if(inEnvironment.isAgentSouth(1,false)) weights[2] += caution;
+				if(inEnvironment.isAgentEast(1,false)) weights[3] += caution;
+				if(inEnvironment.isAgentWest(1,false)) weights[4] += caution;
 
-				if(inEnvironment.isAgentNorth(1,true)) weights[1] += -100000;
-				if(inEnvironment.isAgentSouth(1,true)) weights[2] += -100000;
-				if(inEnvironment.isAgentEast(1,true)) weights[3] += -100000;
-				if(inEnvironment.isAgentWest(1,true)) weights[4] += -100000;
+				if(inEnvironment.isAgentNorth(1,true)) weights[1] +=  terror;
+				if(inEnvironment.isAgentSouth(1,true)) weights[2] += terror;
+				if(inEnvironment.isAgentEast(1,true)) weights[3] += terror;
+				if(inEnvironment.isAgentWest(1,true)) weights[4] += terror;
 				
-				if(inEnvironment.isAgentNorth(0,true)) weights[1] += -10;
-				if(inEnvironment.isAgentSouth(0,true)) weights[2] += -10;
-				if(inEnvironment.isAgentEast(0,true)) weights[3] += -10;
-				if(inEnvironment.isAgentWest(0,true)) weights[4] += -10;
+				if(inEnvironment.isAgentNorth(0,true)) weights[1] += politeness;
+				if(inEnvironment.isAgentSouth(0,true)) weights[2] += politeness;
+				if(inEnvironment.isAgentEast(0,true)) weights[3] += politeness;
+				if(inEnvironment.isAgentWest(0,true)) weights[4] += politeness;
 			}
 			else{
 
 	
 
-				if(inEnvironment.isAgentNorth(0,true)) weights[1] += -10;
-				if(inEnvironment.isAgentSouth(0,true)) weights[2] += -10;
-				if(inEnvironment.isAgentEast(0,true)) weights[3] += -10;
-				if(inEnvironment.isAgentWest(0,true)) weights[4] += -10;
+				if(inEnvironment.isAgentNorth(0,true)) weights[1] += politeness;
+				if(inEnvironment.isAgentSouth(0,true)) weights[2] += politeness;
+				if(inEnvironment.isAgentEast(0,true)) weights[3] += politeness;
+				if(inEnvironment.isAgentWest(0,true)) weights[4] += politeness;
 
-				if(inEnvironment.isAgentNorth(1,false)) weights[1] += 5;
-				if(inEnvironment.isAgentSouth(1,false)) weights[2] += 5;
-				if(inEnvironment.isAgentEast(1,false)) weights[3] += 5;
-				if(inEnvironment.isAgentWest(1,false)) weights[4] += 5;
+				if(inEnvironment.isAgentNorth(1,false)) weights[1] += interest;
+				if(inEnvironment.isAgentSouth(1,false)) weights[2] += interest;
+				if(inEnvironment.isAgentEast(1,false)) weights[3] += interest;
+				if(inEnvironment.isAgentWest(1,false)) weights[4] += interest;
 
-				if(inEnvironment.isAgentNorth(1,true)) weights[1] += 10;
-				if(inEnvironment.isAgentSouth(1,true)) weights[2] += 10;
-				if(inEnvironment.isAgentEast(1,true)) weights[3] += 10;
-				if(inEnvironment.isAgentWest(1,true)) weights[4] += 10;
+				if(inEnvironment.isAgentNorth(1,true)) weights[1] += desire;
+				if(inEnvironment.isAgentSouth(1,true)) weights[2] += desire;
+				if(inEnvironment.isAgentEast(1,true)) weights[3] += desire;
+				if(inEnvironment.isAgentWest(1,true)) weights[4] += desire;
+				
+
+				if(inEnvironment.isBaseNorth(0,true)) weights[1] += terror;
+				if(inEnvironment.isBaseSouth(0,true)) weights[2] += terror;
+				if(inEnvironment.isBaseEast(0,true)) weights[3] += terror;
+				if(inEnvironment.isBaseWest(0,true)) weights[4] += terror;
+
 			}
 			break;
 
 		case 4:
 
 			if(inEnvironment.hasFlag()){
-				if(inEnvironment.isBaseNorth(0,false)) weights[1] += 5;
-				if(inEnvironment.isBaseSouth(0,false)) weights[2] += 5;
-				if(inEnvironment.isBaseEast(0,false)) weights[3] += 5;
-				if(inEnvironment.isBaseWest(0,false)) weights[4] += 5;
+				if(inEnvironment.isBaseNorth(0,false)) weights[1] += desire;
+				if(inEnvironment.isBaseSouth(0,false)) weights[2] += desire;
+				if(inEnvironment.isBaseEast(0,false)) weights[3] += desire;
+				if(inEnvironment.isBaseWest(0,false)) weights[4] += desire;
 
-				if(inEnvironment.isBaseNorth(0,true)) weights[1] += 10;
-				if(inEnvironment.isBaseSouth(0,true)) weights[2] += 10;
-				if(inEnvironment.isBaseEast(0,true)) weights[3] += 10;
-				if(inEnvironment.isBaseWest(0,true)) weights[4] += 10;
+				if(inEnvironment.isBaseNorth(0,true)) weights[1] += greed;
+				if(inEnvironment.isBaseSouth(0,true)) weights[2] += greed;
+				if(inEnvironment.isBaseEast(0,true)) weights[3] += greed;
+				if(inEnvironment.isBaseWest(0,true)) weights[4] += greed;
 
 
-				if(inEnvironment.isAgentNorth(1,false)) weights[1] += -2;
-				if(inEnvironment.isAgentSouth(1,false)) weights[2] += -2;
-				if(inEnvironment.isAgentEast(1,false)) weights[3] += -2;
-				if(inEnvironment.isAgentWest(1,false)) weights[4] += -2;
+				if(inEnvironment.isAgentNorth(1,false)) weights[1] += caution;
+				if(inEnvironment.isAgentSouth(1,false)) weights[2] += caution;
+				if(inEnvironment.isAgentEast(1,false)) weights[3] += caution;
+				if(inEnvironment.isAgentWest(1,false)) weights[4] += caution;
 
-				if(inEnvironment.isAgentNorth(1,true)) weights[1] += -10;
-				if(inEnvironment.isAgentSouth(1,true)) weights[2] += -10;
-				if(inEnvironment.isAgentEast(1,true)) weights[3] += -10;
-				if(inEnvironment.isAgentWest(1,true)) weights[4] += -10;
+				if(inEnvironment.isAgentNorth(1,true)) weights[1] += terror;
+				if(inEnvironment.isAgentSouth(1,true)) weights[2] += terror;
+				if(inEnvironment.isAgentEast(1,true)) weights[3] += terror;
+				if(inEnvironment.isAgentWest(1,true)) weights[4] += terror;
 				
-				if(inEnvironment.isAgentNorth(0,true)) weights[1] += -10;
-				if(inEnvironment.isAgentSouth(0,true)) weights[2] += -10;
-				if(inEnvironment.isAgentEast(0,true)) weights[3] += -10;
-				if(inEnvironment.isAgentWest(0,true)) weights[4] += -10;
+				if(inEnvironment.isAgentNorth(0,true)) weights[1] += politeness;
+				if(inEnvironment.isAgentSouth(0,true)) weights[2] += politeness;
+				if(inEnvironment.isAgentEast(0,true)) weights[3] += politeness;
+				if(inEnvironment.isAgentWest(0,true)) weights[4] += politeness;
 
 			}
 
 			else{
-				if(inEnvironment.isFlagNorth(0,false)) weights[1] += 1;
-				if(inEnvironment.isFlagSouth(0,false)) weights[2] += 1;
-				if(inEnvironment.isFlagEast(0,false)) weights[3] += 1;
-				if(inEnvironment.isFlagWest(0,false)) weights[4] += 1;
+				if(inEnvironment.isFlagNorth(0,false)) weights[1] += interest;
+				if(inEnvironment.isFlagSouth(0,false)) weights[2] += interest;
+				if(inEnvironment.isFlagEast(0,false)) weights[3] += interest;
+				if(inEnvironment.isFlagWest(0,false)) weights[4] += interest;
 
-				if(inEnvironment.isFlagNorth(0,true)) weights[1] += 10;
-				if(inEnvironment.isFlagSouth(0,true)) weights[2] += 10;
-				if(inEnvironment.isFlagEast(0,true)) weights[3] += 10;
-				if(inEnvironment.isFlagWest(0,true)) weights[4] += 10;
+				if(inEnvironment.isFlagNorth(0,true)) weights[1] += interest;
+				if(inEnvironment.isFlagSouth(0,true)) weights[2] += interest;
+				if(inEnvironment.isFlagEast(0,true)) weights[3] += interest;
+				if(inEnvironment.isFlagWest(0,true)) weights[4] += interest;
 
-				if(inEnvironment.isAgentNorth(1,false)) weights[1] += 3;
-				if(inEnvironment.isAgentSouth(1,false)) weights[2] += 3;
-				if(inEnvironment.isAgentEast(1,false)) weights[3] += 3;
-				if(inEnvironment.isAgentWest(1,false)) weights[4] += 3;
+				if(inEnvironment.isAgentNorth(1,false)) weights[1] += desire;
+				if(inEnvironment.isAgentSouth(1,false)) weights[2] += desire;
+				if(inEnvironment.isAgentEast(1,false)) weights[3] += desire;
+				if(inEnvironment.isAgentWest(1,false)) weights[4] += desire;
 
-				if(inEnvironment.isAgentNorth(1,true)) weights[1] += 5;
-				if(inEnvironment.isAgentSouth(1,true)) weights[2] += 5;
-				if(inEnvironment.isAgentEast(1,true)) weights[3] += 5;
-				if(inEnvironment.isAgentWest(1,true)) weights[4] += 5;
+				if(inEnvironment.isAgentNorth(1,true)) weights[1] += greed;
+				if(inEnvironment.isAgentSouth(1,true)) weights[2] += greed;
+				if(inEnvironment.isAgentEast(1,true)) weights[3] += greed;
+				if(inEnvironment.isAgentWest(1,true)) weights[4] += greed;
 				
-				if(inEnvironment.isAgentNorth(0,true)) weights[1] += -10;
-				if(inEnvironment.isAgentSouth(0,true)) weights[2] += -10;
-				if(inEnvironment.isAgentEast(0,true)) weights[3] += -10;
-				if(inEnvironment.isAgentWest(0,true)) weights[4] += -10;
+				if(inEnvironment.isAgentNorth(0,true)) weights[1] += politeness;
+				if(inEnvironment.isAgentSouth(0,true)) weights[2] += politeness;
+				if(inEnvironment.isAgentEast(0,true)) weights[3] += politeness;
+				if(inEnvironment.isAgentWest(0,true)) weights[4] += politeness;
 
 				
 
@@ -408,10 +444,12 @@ public class reb140130Agent extends Agent {
 
 		iHadFlag=inEnvironment.hasFlag();
 
-		if(pathHist.size()>20){
+		if(pathHist.size()>40){
 			pathHist.remove(0);
 		}
 
+		int distanceToHome=position[0]+position[1];
+		System.out.println("distanceToHome"+distanceToHome);
 		int[] newPos = new int[2];
 
 		switch(chosen){
