@@ -21,28 +21,38 @@ public class reb140130Agent extends Agent {
 	double teleProb=0.0;
 	int numAdjObst;
 
+	//DNA
+	double curiosity = -60;
+	double caution = -3;
+	double fear = -10;
+	double politeness = -1000;
+	double terror= -10000;
+	double interest = 1;
+	double desire = 50;
+	double greed = 10000;
+
 	ArrayList<int[]> pathHist = new ArrayList<int[]>();
 
 	public void statelessSetup(AgentEnvironment inEnvironment){
-		
+
 		numAdjObst=0;
 		obstNorth = inEnvironment.isObstacleNorthImmediate();
 		obstSouth = inEnvironment.isObstacleSouthImmediate();
 		obstEast = inEnvironment.isObstacleEastImmediate();
 		obstWest = inEnvironment.isObstacleWestImmediate();	
-		
+
 		if(obstNorth){
 			numAdjObst++;
 		}
-		
+
 		if(obstSouth){
 			numAdjObst++;
 		}
-		
+
 		if(obstEast){
 			numAdjObst++;
 		}
-		
+
 		if(obstWest){
 			numAdjObst++;
 		}
@@ -61,7 +71,7 @@ public class reb140130Agent extends Agent {
 		if(inEnvironment.isAgentWest(0,true)) obstWest = true;
 
 		 */
-		
+
 		int chosen= 0;
 		for(int i=0; i<weights.length; i++){
 			if(prevWeights[i]>=prevWeights[chosen]){
@@ -73,15 +83,15 @@ public class reb140130Agent extends Agent {
 		if(iHadFlag && !inEnvironment.hasFlag()){
 			teleProb+=5;
 		}
-		
+
 		if(baseWasNorth && inEnvironment.isBaseSouth(0,false)){
 			teleProb+=5;
 		}
-		
+
 		if(baseWasSouth && inEnvironment.isBaseNorth(0,false)){
 			teleProb+=5;
 		}
-		
+
 		if(baseWasEast && !inEnvironment.isBaseEast(0,false) ){
 			if(chosen!=3){
 				teleProb+=5;
@@ -89,12 +99,12 @@ public class reb140130Agent extends Agent {
 			else{
 				teleProb+=2;
 			}
-			
+
 			if(numAdjObst>=2){
 				teleProb+=2;
 			}
 		}
-		
+
 		if(baseWasWest && !inEnvironment.isBaseWest(0,false)){
 			if(chosen!=4){
 				teleProb+=5;
@@ -102,13 +112,13 @@ public class reb140130Agent extends Agent {
 			else{
 				teleProb+=2;
 			}
-			
+
 			if(numAdjObst>=2){
 				teleProb+=2;
 			}		}
-		
 
-	
+
+
 		if(chosen==0){
 			for(int j=0; j<weights.length; j++){
 				if(weights[j]==Double.NEGATIVE_INFINITY && prevWeights[j]!=Double.NEGATIVE_INFINITY){
@@ -125,45 +135,45 @@ public class reb140130Agent extends Agent {
 			if (obstSouth){
 				teleProb+=5;
 			}
-			
+
 			if (enWasNorth){
 				teleProb+=1;
 			}
 		}
-		
+
 
 		if (chosen==2){
 			if (obstNorth){
 				teleProb+=5;
 			}
-			
+
 			if (enWasSouth){
 				teleProb+=1;
 			}
 		}
-		
+
 
 		if (chosen==3){
 			if (obstWest){
 				teleProb+=5;
 			}
-			
+
 			if (enWasEast){
 				teleProb+=1;
 			}
 		}
-		
+
 		if (chosen==4){
 			if (obstEast){
 				teleProb+=5;
 			}
-			
+
 			if (enWasWest){
 				teleProb+=1;
 			}
 		}
-		
-		
+
+
 
 
 		if(teleProb>=5){
@@ -187,6 +197,7 @@ public class reb140130Agent extends Agent {
 		int newState = fsm[state][getStateAction()];
 		if(newState!=state){
 
+
 			state=newState;
 			pathHist.removeAll(pathHist);
 		}
@@ -195,13 +206,13 @@ public class reb140130Agent extends Agent {
 		hadFlag=hasFlag;
 	}
 
-	public void stateSetup(){
+	public void stateSetup(AgentEnvironment inEnvironment){
 		//weights = {0,0.1,0.1,0.1,0.1,-10};
 
 
 		weights[0]= -10;
-		weights[1] = 1;
-		weights[2] = 1;
+		weights[1] = 0;
+		weights[2] = 0;
 		weights[3] = 0;
 		weights[4] = 0;
 		weights[5] = Double.NEGATIVE_INFINITY;
@@ -212,13 +223,23 @@ public class reb140130Agent extends Agent {
 
 	public int getStateAction(){
 
-		if(!hadFlag && hasFlag) return 0;
-		if(!enemyHad && enemyHas) return 1;
-		if(hadFlag && !hasFlag ){
-			if(tele) return 2;
-			else return 3;
+		if(!hadFlag && hasFlag){
+			return 0;
 		}
-		if(enemyHad && !enemyHas) return 4;
+		if(!enemyHad && enemyHas){
+			return 1;
+		}
+		if(hadFlag && !hasFlag ){
+			if(tele) {
+				return 2;
+			}
+			else {
+				return 3;
+			}
+		}
+		if(enemyHad && !enemyHas){
+			return 4;
+		}
 
 		return 5;
 	}
@@ -236,38 +257,38 @@ public class reb140130Agent extends Agent {
 
 		//System.out.println("pos"+position[0]+","+position[1]+"\n"+"Hist: ");
 		int n = pathHist.size();
-		double curiosity= (-40 / Math.pow(n+1,2));
+		double focus= (curiosity / Math.pow(n+1,1.5));
 		boolean wasNorth=false, wasSouth=false, wasEast=false, wasWest=false;
 		for(int i=pathHist.size()-1; i>=0; i--){
 			int[] histp=pathHist.get(i);
-			double scale=Math.pow(i, 2);
+			double scale=Math.pow(i, 1.5);
 			//System.out.println(histp[0]+","+histp[1]);
 			if(histp[0]==position[0]){
 				if(histp[1]==position[1]+1){
-					weights[1]+=curiosity*scale-10;
+					weights[1]+=focus*scale-20;
 					wasNorth=true;
 
 				}
 
 				if(histp[1]==position[1]-1){
-					weights[2]+=curiosity*scale-10;
+					weights[2]+=focus*scale-20;
 					wasSouth=true;
 
 				}
 
 				if(histp[1]==position[1]){
-					weights[0]+=curiosity*scale-10;
+					weights[0]+=focus*scale-20;
 				}
 			}
 			if(histp[1]==position[1]){
 				if(histp[0]==position[0]+1){
-					weights[3]+=curiosity*scale-10;
+					weights[3]+=focus*scale-20;
 					wasEast=true;
 
 				}
 
 				if(histp[0]==position[0]-1 ){
-					weights[4]+=curiosity*scale-10;
+					weights[4]+=focus*scale-20;
 					wasWest=true;
 				}
 			}
@@ -276,24 +297,16 @@ public class reb140130Agent extends Agent {
 
 	public void stateHeuristic(AgentEnvironment inEnvironment){
 
-		double caution = -3;
-		double fear = -10;
-		double politeness = -1000;
-		double terror= -10000;
 
-
-		double interest = 1;
-		double desire = 50;
-		double greed = 10000;
 		switch(state){
 		case 1:
-
+			/*
 			if(inEnvironment.isAgentNorth(0,false)) weights[1] += interest;
 			if(inEnvironment.isAgentSouth(0,false)) weights[2] += interest;
 			if(inEnvironment.isAgentEast(0,false)) weights[3] += interest;
-
-			if(inEnvironment.isFlagNorth(1,false)) weights[1] += desire;
-			if(inEnvironment.isFlagSouth(1,false)) weights[2] += desire;
+			 */
+			if(inEnvironment.isFlagNorth(1,false)) weights[1] += desire/2;
+			if(inEnvironment.isFlagSouth(1,false)) weights[2] += desire/2;
 			if(inEnvironment.isFlagEast(1,false)) weights[3] += desire;
 			if(inEnvironment.isFlagWest(1,false)) weights[4] += desire;
 
@@ -334,13 +347,13 @@ public class reb140130Agent extends Agent {
 
 		case 2:
 
-			if(inEnvironment.isBaseNorth(1,false)) weights[1] += desire;
-			if(inEnvironment.isBaseSouth(1,false)) weights[2] += desire;
+			if(inEnvironment.isBaseNorth(1,false)) weights[1] += desire/2;
+			if(inEnvironment.isBaseSouth(1,false)) weights[2] += desire/2;
 			if(inEnvironment.isBaseEast(1,false)) weights[3] += desire;
 			if(inEnvironment.isBaseWest(1,false)) weights[4] += desire;
 
-			if(inEnvironment.isFlagNorth(0,false)) weights[1] += desire;
-			if(inEnvironment.isFlagSouth(0,false)) weights[2] += desire;
+			if(inEnvironment.isFlagNorth(0,false)) weights[1] += desire/2;
+			if(inEnvironment.isFlagSouth(0,false)) weights[2] += desire/2;
 			if(inEnvironment.isFlagEast(0,false)) weights[3] += desire;
 			if(inEnvironment.isFlagWest(0,false)) weights[4] += desire;
 
@@ -368,8 +381,8 @@ public class reb140130Agent extends Agent {
 		case 3:
 
 			if(inEnvironment.hasFlag()){
-				if(inEnvironment.isBaseNorth(0,false)) weights[1] += desire;
-				if(inEnvironment.isBaseSouth(0,false)) weights[2] += desire;
+				if(inEnvironment.isBaseNorth(0,false)) weights[1] += desire/2;
+				if(inEnvironment.isBaseSouth(0,false)) weights[2] += desire/2;
 				if(inEnvironment.isBaseEast(0,false)) weights[3] += desire;
 				if(inEnvironment.isBaseWest(0,false)) weights[4] += desire;
 
@@ -403,15 +416,15 @@ public class reb140130Agent extends Agent {
 				if(inEnvironment.isAgentEast(0,true)) weights[3] += politeness;
 				if(inEnvironment.isAgentWest(0,true)) weights[4] += politeness;
 
-				if(inEnvironment.isAgentNorth(1,false)) weights[1] += interest;
-				if(inEnvironment.isAgentSouth(1,false)) weights[2] += interest;
-				if(inEnvironment.isAgentEast(1,false)) weights[3] += interest;
-				if(inEnvironment.isAgentWest(1,false)) weights[4] += interest;
+				if(inEnvironment.isAgentNorth(1,false)) weights[1] += desire;
+				if(inEnvironment.isAgentSouth(1,false)) weights[2] += desire;
+				if(inEnvironment.isAgentEast(1,false)) weights[3] += desire;
+				if(inEnvironment.isAgentWest(1,false)) weights[4] += desire;
 
-				if(inEnvironment.isAgentNorth(1,true)) weights[1] += desire;
-				if(inEnvironment.isAgentSouth(1,true)) weights[2] += desire;
-				if(inEnvironment.isAgentEast(1,true)) weights[3] += desire;
-				if(inEnvironment.isAgentWest(1,true)) weights[4] += desire;
+				if(inEnvironment.isAgentNorth(1,true)) weights[1] += greed;
+				if(inEnvironment.isAgentSouth(1,true)) weights[2] += greed;
+				if(inEnvironment.isAgentEast(1,true)) weights[3] += greed;
+				if(inEnvironment.isAgentWest(1,true)) weights[4] += greed;
 
 
 				if(inEnvironment.isBaseNorth(0,true)) weights[1] += terror;
@@ -425,8 +438,8 @@ public class reb140130Agent extends Agent {
 		case 4:
 
 			if(inEnvironment.hasFlag()){
-				if(inEnvironment.isBaseNorth(0,false)) weights[1] += desire;
-				if(inEnvironment.isBaseSouth(0,false)) weights[2] += desire;
+				if(inEnvironment.isBaseNorth(0,false)) weights[1] += desire/2;
+				if(inEnvironment.isBaseSouth(0,false)) weights[2] += desire/2;
 				if(inEnvironment.isBaseEast(0,false)) weights[3] += desire;
 				if(inEnvironment.isBaseWest(0,false)) weights[4] += desire;
 
@@ -459,10 +472,10 @@ public class reb140130Agent extends Agent {
 				if(inEnvironment.isFlagEast(0,false)) weights[3] += interest;
 				if(inEnvironment.isFlagWest(0,false)) weights[4] += interest;
 
-				if(inEnvironment.isFlagNorth(0,true)) weights[1] += interest;
-				if(inEnvironment.isFlagSouth(0,true)) weights[2] += interest;
-				if(inEnvironment.isFlagEast(0,true)) weights[3] += interest;
-				if(inEnvironment.isFlagWest(0,true)) weights[4] += interest;
+				if(inEnvironment.isFlagNorth(0,true)) weights[1] += greed;
+				if(inEnvironment.isFlagSouth(0,true)) weights[2] += greed;
+				if(inEnvironment.isFlagEast(0,true)) weights[3] += greed;
+				if(inEnvironment.isFlagWest(0,true)) weights[4] += greed;
 
 				if(inEnvironment.isAgentNorth(1,false)) weights[1] += desire;
 				if(inEnvironment.isAgentSouth(1,false)) weights[2] += desire;
@@ -489,7 +502,7 @@ public class reb140130Agent extends Agent {
 	public int getMove(AgentEnvironment inEnvironment){
 
 		statelessSetup(inEnvironment);
-		stateSetup();
+		stateSetup(inEnvironment);
 		//System.out.println(pathHist.size());
 		//System.out.print(position[0]+", "+position[1]+", ");
 		//System.out.println(state);
@@ -523,11 +536,31 @@ public class reb140130Agent extends Agent {
 		int chosen=0;
 		//System.out.println("weights");
 
+		ArrayList<Integer> highest = new ArrayList<>();
 		for(int i=0; i<weights.length; i++){
 			//System.out.println(weights[i]);
-			if(weights[i]>=weights[chosen]){
+			if(weights[i]>weights[chosen]){
+				highest.removeAll(highest);
 				chosen=i;
 			}
+
+			if(weights[i]==weights[chosen]){
+				if(highest.isEmpty()){
+					highest.add(chosen);
+				}
+				highest.add(i);
+			}
+
+			if(!highest.isEmpty()){
+				Random rand= new Random();
+				int randChoose=rand.nextInt(highest.size());
+				chosen=highest.get(randChoose);
+			}
+			System.out.println(highest.size()+","+chosen);
+
+
+
+
 		}
 
 		for (int i=0; i<weights.length; i++){
@@ -539,7 +572,7 @@ public class reb140130Agent extends Agent {
 		enWasSouth=inEnvironment.isAgentSouth(1,true);
 		enWasEast=inEnvironment.isAgentEast(1,true);
 		enWasWest=inEnvironment.isAgentWest(1,true);
-		
+
 		baseWasNorth=inEnvironment.isBaseNorth(0,false);
 		baseWasSouth=inEnvironment.isBaseSouth(0,false);
 		baseWasEast=inEnvironment.isBaseEast(0,false);
